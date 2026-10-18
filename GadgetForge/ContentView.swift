@@ -34,8 +34,18 @@ struct ContentView: View {
 
     var body: some View {
         NavigationSplitView {
-            List(Step.allCases, selection: $step) { s in
-                Label(s.title, systemImage: s.icon)
+            List {
+                ForEach(Step.allCases) { s in
+                    Button(action: { step = s }) {
+                        HStack {
+                            Label(s.title, systemImage: s.icon)
+                            Spacer()
+                        }
+                        .contentShape(Rectangle())
+                    }
+                    .buttonStyle(.plain)
+                    .listRowBackground(step == s ? Color.accentColor.opacity(0.18) : Color.clear)
+                }
             }
             .navigationTitle("GadgetForge")
         } detail: {
