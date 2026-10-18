@@ -62,6 +62,7 @@
 				C100000000000000000000011 /* Gerber.swift */,
 				A1B2C3D4E5F60011223344BB /* Products */,
 			);
+			path = GadgetForge;
 			sourceTree = "<group>";
 		};
 		A1B2C3D4E5F60011223344BB /* Products */ = {
