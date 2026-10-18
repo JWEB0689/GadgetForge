@@ -1,0 +1,60 @@
+name: Build macOS app (Intel)
+
+# Builds GadgetForge for Intel Macs on every push to main.
+# Signing is ad-hoc (no Developer ID certificate in CI): the app runs after
+# right-click -> Open on first launch. For a notarized Developer ID build,
+# add APPLE_CERTIFICATE_P12 / APPLE_CERT_PASSWORD / KEYCHAIN_PASSWORD secrets
+# and switch CODE_SIGN_IDENTITY below.
+
+on:
+  push:
+    branches: [main]
+  workflow_dispatch:
+
+jobs:
+  build:
+    runs-on: macos-15
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Select Xcode 16
+        run: |
+          XC=$(ls -d /Applications/Xcode_16*.app 2>/dev/null | sort -V | tail -1)
+          if [ -n "$XC" ]; then sudo xcode-select -s "$XC/Contents/Developer"; fi
+          xcodebuild -version
+
+      - name: Build GadgetForge (x86_64, ad-hoc signed)
+        run: |
+          xcodebuild build \
+            -project GadgetForge.xcodeproj \
+            -target GadgetForge \
+            -configuration Release \
+            ARCHS=x86_64 ONLY_ACTIVE_ARCH=NO \
+            CODE_SIGN_STYLE=Manual CODE_SIGN_IDENTITY="-" \
+            -derivedDataPath build
+          ls -la build/Build/Products/Release/GadgetForge.app
+
+      - name: Zip the app
+        run: |
+          ditto -c -k --sequesterRsrc --keepParent \
+            build/Build/Products/Release/GadgetForge.app \
+            GadgetForge-mac-intel.zip
+
+      - name: Upload artifact
+        uses: actions/upload-artifact@v4
+        with:
+          name: GadgetForge-mac-intel
+          path: GadgetForge-mac-intel.zip
+          retention-days: 30
+
+      - name: Create release
+        if: github.ref == 'refs/heads/main'
+        uses: ncipollo/release-action@v1
+        with:
+          tag: build-${{ github.run_number }}
+          name: GadgetForge build ${{ github.run_number }} (Intel macOS)
+          body: |
+            Ad-hoc signed Intel build of GadgetForge for macOS 15+.
+            First launch: right-click the app -> Open.
+          artifacts: GadgetForge-mac-intel.zip
+          token: ${{ secrets.GITHUB_TOKEN }}
