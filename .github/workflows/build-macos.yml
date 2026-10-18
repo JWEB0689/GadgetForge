@@ -43,7 +43,7 @@ jobs:
             GadgetForge-mac-intel.zip
 
       - name: Upload artifact
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v6
         with:
           name: GadgetForge-mac-intel
           path: GadgetForge-mac-intel.zip
