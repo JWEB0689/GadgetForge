@@ -144,11 +144,13 @@ struct EnclosureView: View {
     var body: some View {
         Group {
             if let d = store.design, let spec = store.enclosureSpec {
+                let dims = String(format: "Tray: %.0f × %.0f × %.0f mm (walls %.0f mm). Lid included in the STL, offset beside the tray.",
+                                  spec.trayW, spec.trayD, spec.trayWallH, spec.wall)
                 VStack(alignment: .leading, spacing: 12) {
                     EnclosurePreview(spec: spec, design: d)
                         .frame(minHeight: 380)
                         .border(.quaternary)
-                    Text("Tray: \(Int(spec.trayW)) × \(Int(spec.trayD)) × \(Int(spec.trayWallH)) mm (walls \(spec.wall, spec: "%.0f") mm). Lid included in the STL, offset beside the tray.")
+                    Text(dims)
                         .font(.caption).foregroundStyle(.secondary)
                     Button("Export enclosure STL (3D-printable)") {
                         Exporter.save(data: stlData(for: spec),
